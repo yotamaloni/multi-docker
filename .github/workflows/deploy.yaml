@@ -1,27 +1,47 @@
 name: Deploy MultiDocker
+
 on:
   push:
     branches:
-      - master # check your repo, your default branch might be master!
+      - master  # adjust if your default branch is "main"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t rallycoding/react-test-up -f ./client/Dockerfile.dev ./client
-      - run: docker run -e CI=true rallycoding/react-test-up npm test
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - run: docker build -t rallycoding/multi-client-up ./client
-      - run: docker build -t rallycoding/multi-nginx-up ./nginx
-      - run: docker build -t rallycoding/multi-server-up ./server
-      - run: docker build -t rallycoding/multi-worker-up ./worker
+      # Secure Docker Hub login
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - run: docker push rallycoding/multi-client-up
-      - run: docker push rallycoding/multi-nginx-up
-      - run: docker push rallycoding/multi-server-up
-      - run: docker push rallycoding/multi-worker-up
+      # Run client tests
+      - name: Build client test image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/react-test -f ./client/Dockerfile.dev ./client
+
+      - name: Run client tests
+        run: docker run -e CI=true ${{ secrets.DOCKER_USERNAME }}/react-test npm test
+
+      # Build all production images
+      - name: Build images
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/multi-client-up ./client
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/multi-nginx-up ./nginx
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/multi-server-up ./server
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/multi-worker-up ./worker
+
+      # Push all images to Docker Hub
+      - name: Push images to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/multi-client-up
+          docker push ${{ secrets.DOCKER_USERNAME }}/multi-nginx-up
+          docker push ${{ secrets.DOCKER_USERNAME }}/multi-server-up
+          docker push ${{ secrets.DOCKER_USERNAME }}/multi-worker-up
 
       # - name: Generate deployment package
       #   run: zip -r deploy.zip . -x '*.git*'
