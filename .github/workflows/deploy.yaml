@@ -51,9 +51,12 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: multi-docker
-          environment_name: Multi-docker-env
-          existing_bucket_name: elasticbeanstalk-eu-north-1-837765878321
-          region: eu-north-1
+          application_name: 'multi-docker'             
+          environment_name: 'Multi-docker-env'           
+          region: 'eu-north-1'                          
           version_label: ${{ github.sha }}
-          deployment_package: deploy.zip
+          # deployment_package: Dockerrun.aws.json
+          bucket_name: 'elasticbeanstalk-eu-north-1-837765878321'  
+          bucket_path: 'docker-multi'
+
+
