@@ -55,8 +55,6 @@ jobs:
           environment_name: 'Multi-docker-env'           
           region: 'eu-north-1'                          
           version_label: ${{ github.sha }}
-          # deployment_package: Dockerrun.aws.json
-          bucket_name: 'elasticbeanstalk-eu-north-1-837765878321'  
+          deployment_package: deploy.zip
+          existing_bucket_name: 'elasticbeanstalk-eu-north-1-837765878321'  
           bucket_path: 'docker-multi'
-
-
